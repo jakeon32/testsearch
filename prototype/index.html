@@ -166,6 +166,25 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
 
 /* ── Proto bottom spacer ── */
 .proto-bottom{height:60px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;}
+
+/* ── Admin Settings Panel ── */
+.admin-panel{margin:40px 32px 24px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.admin-panel-header{padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;}
+.admin-panel-header h3{font-size:14px;font-weight:700;color:#1e293b;}
+.admin-panel-header .ver{font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:4px;}
+.admin-form{padding:16px 20px;}
+.admin-row{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f8fafc;}
+.admin-row:last-child{border-bottom:none;}
+.admin-row.new-item{background:#faf5ff;margin:0 -20px;padding:10px 20px;border-radius:6px;border:1px dashed #c084fc;}
+.admin-label{width:160px;flex-shrink:0;font-size:12px;font-weight:600;color:#374151;padding-top:6px;}
+.admin-label .new-badge{display:inline-block;font-size:9px;background:#a855f7;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700;}
+.admin-value{flex:1;min-width:0;}
+.admin-input{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;color:#374151;background:#fff;}
+.admin-select{padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;color:#374151;background:#fff;min-width:180px;}
+.admin-radio-group{display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;}
+.admin-radio{display:flex;align-items:center;gap:5px;font-size:12px;color:#374151;cursor:pointer;}
+.admin-radio input[type="radio"]{accent-color:#3b82f6;width:14px;height:14px;cursor:pointer;}
+.admin-radio.selected{font-weight:600;color:#1e293b;}
 </style>
 </head>
 <body>
@@ -285,6 +304,111 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
     <!-- Dropdown backdrop -->
     <div class="dd-backdrop" id="ddBg" onclick="closeDD()"></div>
 
+    <!-- Admin Settings Panel -->
+    <div class="admin-panel">
+      <div class="admin-panel-header">
+        <h3>Shuttlebus: Form Search</h3>
+        <span class="ver">ver 1.2</span>
+      </div>
+      <div class="admin-form">
+        <div class="admin-row">
+          <div class="admin-label">상품/서비스 내용</div>
+          <div class="admin-value"><input class="admin-input" value="비발디파크 셔틀" readonly></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">하위 제목</div>
+          <div class="admin-value"><input class="admin-input" value="서울, 인천, 경기 ↔ 비발디파크" readonly></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">검색 가능 시작일</div>
+          <div class="admin-value"><input class="admin-input" value="1" readonly style="width:60px;"></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">탑승 인원수 제한</div>
+          <div class="admin-value"><input class="admin-input" value="10" readonly style="width:60px;"></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">운영사</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>금호고속 (#2739)</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">목적지 카테고리</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>셔틀버스</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">목적지</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>비발디파크</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">검색어 노출 양식</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>1</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">1Depth</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>정거장</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">2Depth</div>
+          <div class="admin-value"><select class="admin-select" disabled><option>정거장</option></select></div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">검색조건</div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio"><input type="radio" name="adm_search" value="both">편도 + 왕복</label>
+              <label class="admin-radio"><input type="radio" name="adm_search" value="rt">왕복</label>
+              <label class="admin-radio selected"><input type="radio" name="adm_search" value="ow" checked>편도</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-row new-item">
+          <div class="admin-label">서치폼 모드<span class="new-badge">NEW</span></div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio" id="admModeA"><input type="radio" name="adm_mode" value="route" onchange="setMode('route')">노선 중심</label>
+              <label class="admin-radio" id="admModeB"><input type="radio" name="adm_mode" value="date" onchange="setMode('date')">날짜 중심</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">주요지점 노출여부</div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio"><input type="radio" name="adm_poi" value="show">노출</label>
+              <label class="admin-radio selected"><input type="radio" name="adm_poi" value="hide" checked>숨김</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">주요지점 설정:1Depth</div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio"><input type="radio" name="adm_poi1" value="dest">목적지</label>
+              <label class="admin-radio selected"><input type="radio" name="adm_poi1" value="station" checked>정거장</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">주요지점 설정:2Depth</div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio"><input type="radio" name="adm_poi2" value="set">설정 (정거장)</label>
+              <label class="admin-radio selected"><input type="radio" name="adm_poi2" value="unset" checked>미설정</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="admin-label">스타일 배경</div>
+          <div class="admin-value">
+            <div class="admin-radio-group">
+              <label class="admin-radio selected"><input type="radio" name="adm_bg" value="normal" checked>일반</label>
+              <label class="admin-radio"><input type="radio" name="adm_bg" value="slider">슬라이더 캐러셀</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="proto-bottom">프로토타입 — 필드를 클릭하여 드롭다운 인터랙션 확인</div>
   </div>
 </main>
@@ -366,6 +490,11 @@ function setMode(m){S.mode=m;S.dep=S.ret=S.from=S.to=null;S.dd=null;
   document.getElementById('btnA').classList.toggle('active',m==='route');
   document.getElementById('btnB').classList.toggle('active',m==='date');
   document.getElementById('modeText').textContent=m==='route'?'Mode A — 노선 중심':'Mode B — 날짜 중심';
+  // 관리자 패널 라디오 동기화
+  const rA=document.querySelector('#admModeA input'),rB=document.querySelector('#admModeB input');
+  if(rA)rA.checked=m==='route';if(rB)rB.checked=m==='date';
+  document.getElementById('admModeA').classList.toggle('selected',m==='route');
+  document.getElementById('admModeB').classList.toggle('selected',m==='date');
   render();}
 function setTrip(t){S.trip=t;S.ret=null;S.dd=null;
   document.getElementById('tOW').classList.toggle('active',t==='oneway');
@@ -560,6 +689,9 @@ function doSearch(){
 function closeRes(e){if(e.target===document.getElementById('resOv'))closeResF();}
 function closeResF(){document.getElementById('resOv').classList.remove('open');}
 
+// 초기 관리자 패널 동기화
+document.querySelector('#admModeA input').checked=true;
+document.getElementById('admModeA').classList.add('selected');
 render();
 </script>
 </body>
