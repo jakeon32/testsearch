@@ -448,26 +448,36 @@ function locC(type){
   // available filter (date mode)
   let avail=null;
   if(type==='from'&&S.mode==='date'&&S.dep) avail=new Set(gFroms(S.dep).map(String));
-  if(type==='to'&&S.from){
-    const its=S.mode==='route'?(RT[S.from]||[]):(S.dep?gTos(S.from,S.dep):[]);
-    if(!its.length)return`<p style="color:#94a3b8;text-align:center;padding:20px">출발지를 먼저 선택하세요</p>`;
-    // 도착지가 주요지점(250)만이면 바로 표시
-    if(its.length===1&&its[0]===250){
-      return`<div class="loc-chips"><div class="loc-chip sel">${LOC[250]}</div></div>`;
+  if(type==='to'){
+    if(S.from){
+      const its=S.mode==='route'?(RT[S.from]||[]):(S.dep?gTos(S.from,S.dep):[]);
+      if(its.length===1&&its[0]===250){
+        return`<div class="loc-chips"><div class="loc-chip sel">${LOC[250]}</div></div>`;
+      }
+      if(its.length>0) avail=new Set(its.map(String));
     }
-    // 도착지가 여러개 (비발디파크→각 역) → 카테고리 탭+칩
-    avail=new Set(its.map(String));
+    // 출발지 미선택 시에도 목적지(비발디파크) 표시
   }
 
   // 출발지가 250(비발디파크)인 경우 도착지는 각 역 → 카테고리 표시
+  // 출발지 미선택 + 도착지인 경우도 주요지점(비발디파크) 선택 가능하게 표시
   const showStations=(type==='from')||(type==='to'&&S.from==='250');
 
-  if(!showStations){
-    // 도착지: 단순 칩 목록
+  if(!showStations&&type==='to'&&S.from&&avail){
+    // 도착지: 단순 칩 목록 (출발지가 일반역일 때)
     const its=S.mode==='route'?(RT[S.from]||[]):(S.dep?gTos(S.from,S.dep):[]);
     let h='<div class="loc-chips">';
     its.forEach(id=>{h+=`<div class="loc-chip ${sel===String(id)?'sel':''}" onclick="${pickFn}('${id}')">${LOC[id]}</div>`;});
     h+='</div>';
+    return h;
+  }
+
+  // 도착지 + 출발지 미선택 → 비발디파크만 바로 표시
+  if(type==='to'&&!S.from){
+    let h='<div class="loc-chips">';
+    h+=`<div class="loc-chip ${sel==='250'?'sel':''}" onclick="${pickFn}('250')">${LOC[250]}</div>`;
+    h+='</div>';
+    h+='<p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:8px;">출발지 선택 후 도착지가 자동 결정됩니다</p>';
     return h;
   }
 
