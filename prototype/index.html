@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화면 기획서: 셔틀버스 서치폼 (듀얼 모드)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-color:#f3f4f6;--panel-bg:#ffffff;--text-main:#1f2937;--text-muted:#6b7280;
+  --border-color:#e5e7eb;--primary:#3b82f6;--primary-dark:#2563eb;
+  --wf-border:#9ca3af;--wf-bg:#f9fafb;--anno-color:#ef4444;
+  --search-primary:#1794E3;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);color:var(--text-main);display:flex;height:100vh;overflow:hidden;}
+
+/* ── 반응형 ── */
+@media(max-width:1300px){
+  body{flex-direction:column;height:auto;overflow:auto;}
+  .doc-panel{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border-color);}
+  .canvas-panel{padding:20px!important;}
+}
+
+/* ══════════════════════
+   좌측: 기획서 패널
+   ══════════════════════ */
+.doc-panel{width:440px;background:var(--panel-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column;box-shadow:2px 0 10px rgba(0,0,0,.05);z-index:10;flex-shrink:0;}
+.doc-header{padding:24px;border-bottom:1px solid var(--border-color);background:#f8fafc;}
+.doc-header h1{font-size:22px;font-weight:700;color:#0f172a;line-height:1.4;margin-bottom:8px;}
+.doc-header h1 span{display:inline-block;background:#2563eb;color:#fff;font-size:12px;padding:2px 6px;border-radius:4px;vertical-align:middle;margin-right:8px;}
+.doc-header p{font-size:14px;color:var(--text-muted);}
+.doc-content{padding:24px;overflow-y:auto;flex:1;}
+.doc-section{margin-bottom:28px;}
+.doc-section h2{font-size:17px;font-weight:700;display:flex;align-items:center;margin-bottom:10px;color:#1e293b;}
+.doc-section p{font-size:13px;line-height:1.7;color:#475569;margin-bottom:10px;}
+.info-box{padding:14px;border-radius:6px;margin-bottom:20px;}
+.info-box h2{font-size:15px;margin-bottom:6px;border:none;padding:0;}
+.info-box p,.info-box li{font-size:12px;line-height:1.6;}
+.info-box ul{margin-left:14px;margin-top:6px;}
+
+.annotation-list{list-style:none;}
+.annotation-item{display:flex;margin-bottom:14px;align-items:flex-start;}
+.anno-num{background:var(--anno-color);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:10px;flex-shrink:0;margin-top:2px;}
+.anno-text h3{font-size:14px;font-weight:700;margin-bottom:3px;color:#0f172a;}
+.anno-text p{font-size:12px;color:#475569;line-height:1.5;margin-bottom:0;}
+
+/* flow table */
+.flow-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;}
+.flow-table th,.flow-table td{border:1px solid var(--border-color);padding:6px 10px;text-align:left;}
+.flow-table th{background:#f1f5f9;font-weight:700;color:#334155;}
+.flow-table td{color:#475569;}
+.flow-table .highlight{background:#eff6ff;font-weight:600;color:#1e40af;}
+
+/* ══════════════════════
+   우측: 프로토타입 캔버스
+   ══════════════════════ */
+.canvas-panel{flex:1;padding:40px;overflow:auto;background-image:radial-gradient(#d1d5db 1px,transparent 0);background-size:20px 20px;display:flex;align-items:flex-start;justify-content:center;}
+
+.proto-frame{width:900px;background:#fff;border:2px solid var(--wf-border);border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);overflow:visible;position:relative;}
+
+/* ── Admin toggle bar ── */
+.admin-toggle{background:#1e293b;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;border-radius:6px 6px 0 0;}
+.admin-toggle .label{opacity:.5;}
+.admin-toggle .switch{display:flex;background:#334155;border-radius:6px;overflow:hidden;}
+.admin-toggle .switch button{padding:5px 14px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s;}
+.admin-toggle .switch button.active{background:var(--search-primary);color:#fff;}
+
+/* ── Hero ── */
+.proto-hero{background:linear-gradient(180deg,#0063AF 2%,#65A1FF 100%);padding:50px 20px 70px;text-align:center;position:relative;}
+.proto-hero::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.08);}
+.proto-hero .h-title{font-size:28px;font-weight:700;color:#fff;position:relative;margin-bottom:4px;}
+.proto-hero .h-sub{font-size:13px;color:rgba(255,255,255,.7);position:relative;}
+.proto-hero .h-mode{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.12);padding:4px 12px;border-radius:99px;margin-top:8px;position:relative;}
+.proto-hero .h-mode .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;}
+
+/* ── Search bar ── */
+.sb-wrap{position:relative;z-index:200;margin-top:-36px;padding:0 32px;max-width:860px;margin-left:auto;margin-right:auto;}
+.sb-tabs{display:flex;gap:2px;}
+.sb-tabs button{padding:9px 24px;border:none;background:rgba(255,255,255,.3);color:rgba(255,255,255,.8);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;}
+.sb-tabs button:first-of-type{border-radius:10px 0 0 0;}
+.sb-tabs button:last-of-type{border-radius:0 10px 0 0;}
+.sb-tabs button.active{background:#fff;color:var(--text-main);}
+
+.sb-bar{background:#fff;border-radius:0 10px 14px 14px;box-shadow:0 8px 32px rgba(0,0,0,.12);display:flex;align-items:stretch;overflow:visible;position:relative;}
+.sb-cell{flex:1 1 0;position:relative;min-width:0;}
+.sb-field{display:flex;align-items:center;padding:14px 16px;gap:10px;cursor:pointer;transition:background .15s;height:100%;}
+.sb-field:hover{background:#f8fafc;}
+.sb-field.active{background:#eff6ff;}
+.sb-field .ico{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sb-field .ico svg{width:18px;height:18px;color:var(--search-primary);}
+.sb-field .fc{flex:1;min-width:0;}
+.sb-field .fl{font-size:10px;color:var(--text-muted);font-weight:500;line-height:1;margin-bottom:2px;}
+.sb-field .fv{font-size:13px;font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-field .fv.ph{color:#94a3b8;font-weight:400;}
+.sb-field .badge{font-size:9px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:99px;font-weight:600;white-space:nowrap;}
+.sb-divider{width:1px;background:#f1f5f9;align-self:stretch;margin:10px 0;flex-shrink:0;}
+.sb-date-pair{display:flex;flex:2 1 0;}
+.sb-date-pair .sb-cell:first-child{border-right:1px solid #f1f5f9;}
+.sb-action{padding:8px 10px 8px 0;display:flex;align-items:center;}
+.sb-action .btn-go{width:48px;height:48px;padding:0;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.sb-action .btn-go.ready{background:var(--search-primary);color:#fff;}
+.sb-action .btn-go.ready:hover{background:#0d7cc5;}
+.sb-action .btn-go:not(.ready){background:#e2e8f0;color:#94a3b8;cursor:default;}
+.sb-action .btn-go svg{width:20px;height:20px;}
+
+/* ── Dropdown Panel ── */
+.dd{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:340px;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:200;padding:18px;animation:ddIn .15s ease-out;max-height:440px;overflow-y:auto;}
+.dd.wide{min-width:420px;}
+.dd.open{display:block;}
+.dd.right{left:auto;right:0;}
+@keyframes ddIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.dd-backdrop{display:none;position:fixed;inset:0;z-index:150;}
+.dd-backdrop.open{display:block;}
+
+/* ── Annotations (inline in elements) ── */
+.wf-anno{background:var(--anno-color);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);z-index:300;pointer-events:none;flex-shrink:0;}
+
+/* ── Calendar ── */
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.cal-header .ml{font-weight:700;font-size:15px;}
+.cal-header button{width:32px;height:32px;border:1px solid var(--border-color);background:#fff;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.cal-wk{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:var(--text-muted);margin-bottom:6px;font-weight:500;}
+.cal-ds{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500;}
+.cal-d:hover:not(.off):not(.empty){background:#eff6ff;}
+.cal-d.sel{background:var(--search-primary);color:#fff;font-weight:700;}
+.cal-d.off{color:#d1d5db;cursor:default;}
+.cal-d.empty{cursor:default;}
+.cal-d.avail:not(.sel){color:var(--search-primary);font-weight:700;}
+.cal-d.today:not(.sel){box-shadow:inset 0 0 0 2px #e2e8f0;}
+.cal-hint{margin-top:10px;font-size:11px;color:var(--text-muted);text-align:center;}
+
+/* ── Location Chips ── */
+.loc-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.loc-tab{border:none;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.loc-tab.on{background:var(--search-primary);color:#fff;}
+.loc-tab.off{background:#f1f5f9;color:#64748b;}
+.loc-tab.off:hover{background:#e2e8f0;}
+.loc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.loc-chip{padding:7px 14px;border:1px solid #e2e8f0;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:#fff;color:#374151;white-space:nowrap;}
+.loc-chip:hover{border-color:var(--search-primary);color:var(--search-primary);background:#eff6ff;}
+.loc-chip.sel{border-color:var(--search-primary);background:var(--search-primary);color:#fff;}
+.loc-chip.dis{opacity:.3;pointer-events:none;}
+.loc-sep{border-top:1px dashed #d1d5db;margin:14px 0 12px;padding-top:12px;}
+.loc-sep-label{font-size:12px;font-weight:600;color:#6b7280;margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+
+/* ── Pax ── */
+.px-c{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 0;}
+.px-b{width:42px;height:42px;border:2px solid var(--border-color);background:#fff;border-radius:12px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--text-main);transition:all .15s;}
+.px-b:hover{border-color:var(--search-primary);color:var(--search-primary);}
+.px-b:disabled{opacity:.3;cursor:default;}
+.px-v{font-size:28px;font-weight:800;min-width:36px;text-align:center;}
+.px-ok{width:100%;padding:11px;border:none;border-radius:10px;background:var(--search-primary);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;}
+
+/* ── Result ── */
+.res-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;}
+.res-ov.open{display:flex;}
+.res-card{background:#fff;border-radius:16px;padding:24px;max-width:400px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,.2);}
+.res-card h3{font-size:16px;font-weight:700;margin-bottom:14px;}
+.pr{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
+.pr:last-child{border-bottom:none;}
+.pr .pl{color:var(--text-muted);}
+.pr .pv{font-weight:600;}
+.res-url{margin-top:14px;background:#f1f5f9;padding:10px;border-radius:8px;font-size:11px;font-family:monospace;word-break:break-all;color:#475569;}
+.res-close{margin-top:14px;width:100%;padding:10px;border:1px solid var(--border-color);background:#fff;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+
+/* ── Proto bottom spacer ── */
+.proto-bottom{height:60px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ 좌측: 기획서 ══════════════ -->
+<aside class="doc-panel">
+  <header class="doc-header">
+    <h1><span>PLAN</span>셔틀버스 서치폼 (듀얼 모드)</h1>
+    <p>화이트라벨 관리자 설정 기반, 노선/날짜 중심 전환 가능</p>
+  </header>
+  <div class="doc-content">
+
+    <div class="info-box" style="background:#eff6ff;border:1px solid #bfdbfe;">
+      <h2 style="color:#1e40af;">핵심 콘셉트</h2>
+      <p style="color:#1e3a8a;">관리자가 서비스 특성에 맞는 서치폼 모드를 선택하면, 화이트라벨 프론트엔드에 해당 모드가 적용됩니다. 동일한 데이터 소스를 사용하며, 검색 결과 페이지는 모드 무관하게 동일합니다.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>모드별 플로우 비교</h2>
+      <table class="flow-table">
+        <tr><th></th><th>Mode A: 노선 중심</th><th class="highlight">Mode B: 날짜 중심</th></tr>
+        <tr><td>1차 선택</td><td>출발지</td><td class="highlight">출발 날짜</td></tr>
+        <tr><td>2차 선택</td><td>도착지</td><td class="highlight">출발지 (수동)</td></tr>
+        <tr><td>3차 선택</td><td>날짜</td><td class="highlight">도착지 (1개면 자동)</td></tr>
+        <tr><td>사용자 심리</td><td>"어디서 어디로"</td><td class="highlight">"언제 갈 수 있지"</td></tr>
+        <tr><td>적합 서비스</td><td>다수 노선, 정기 운행</td><td class="highlight">소수 노선, 이벤트형</td></tr>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h2>화면 구성 요소</h2>
+      <ul class="annotation-list">
+        <li class="annotation-item">
+          <div class="anno-num">1</div>
+          <div class="anno-text">
+            <h3>관리자 모드 토글</h3>
+            <p>화이트라벨 관리자 패널에서 "노선 중심" 또는 "날짜 중심" 모드를 선택합니다. 실제 서비스에서는 관리자 설정으로 반영됩니다.</p>
+          </div>
+        </li>
+        <li class="annotation-item">
+          <div class="anno-num">2</div>
+          <div class="anno-text">
+            <h3>편도/왕복 탭</h3>
+            <p>편도 또는 왕복을 선택합니다. 왕복 선택 시 귀환 날짜 필드가 추가됩니다. 기본값은 관리자 설정에 따릅니다.</p>
+          </div>
+        </li>
+        <li class="annotation-item">
+          <div class="anno-num">3</div>
+          <div class="anno-text">
+            <h3>가로형 서치바 (PC)</h3>
+            <p>필드 클릭 시 해당 필드 아래에 드롭다운 패널이 앵커링됩니다. 모바일에서는 바텀시트 모달로 전환됩니다.</p>
+          </div>
+        </li>
+        <li class="annotation-item">
+          <div class="anno-num">4</div>
+          <div class="anno-text">
+            <h3>날짜 선택 (캘린더 드롭다운)</h3>
+            <p><strong>Mode A:</strong> 출발지/도착지 선택 후, 해당 노선 운행일만 활성화.<br><strong>Mode B:</strong> 전체 노선 운행일 합집합으로 활성화. 비운행일은 회색 처리.</p>
+          </div>
+        </li>
+        <li class="annotation-item">
+          <div class="anno-num">5</div>
+          <div class="anno-text">
+            <h3>출발지/도착지 선택</h3>
+            <p><strong>출발지:</strong> 반드시 수동 선택 (자동선택 불가).<br><strong>도착지:</strong> 1개인 경우 자동 입력 + "자동" 뱃지 표시. 2개 이상이면 수동 선택 필수.</p>
+          </div>
+        </li>
+        <li class="annotation-item">
+          <div class="anno-num">6</div>
+          <div class="anno-text">
+            <h3>인원 선택 / 검색 실행</h3>
+            <p>기본 1명, +/- 버튼 조정. 필수 항목 모두 선택 완료 시 검색 버튼 활성화. 검색 결과 페이지로 동일한 파라미터를 전달합니다.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>관리자 설정 데이터</h2>
+      <pre style="background:#f1f5f9;padding:12px;border-radius:6px;font-size:11px;color:#475569;overflow-x:auto;line-height:1.6;">{
+  "searchForm": {
+    "mode": "route" | "date",
+    "defaultTripType": "oneway" | "roundtrip",
+    "maxPassengers": 10
+  }
+}</pre>
+    </div>
+
+    <div class="info-box" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+      <h2 style="color:#166534;">공통 검색 파라미터</h2>
+      <p style="color:#166534;margin-bottom:4px;">두 모드 모두 동일한 파라미터를 검색 결과 페이지에 전달합니다:</p>
+      <pre style="font-size:11px;color:#166534;line-height:1.5;margin:0;">/search-results?
+  type=oneway|roundtrip
+  &departure_date=2026-03-16
+  &return_date=2026-03-18
+  &from_id=302
+  &to_id=5
+  &passengers=2</pre>
+    </div>
+
+    <div class="doc-section">
+      <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">v2.0 / 화이트라벨 듀얼 모드 서치폼</p>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════ 우측: 프로토타입 ══════════════ -->
+<main class="canvas-panel">
+  <div class="proto-frame">
+
+    <!-- 1. Admin toggle -->
+    <div class="admin-toggle">
+      <span class="wf-anno">1</span>
+      <span class="label">관리자 설정:</span>
+      <span class="label">서치폼 모드</span>
+      <div class="switch">
+        <button id="btnA" class="active" onclick="setMode('route')">노선 중심</button>
+        <button id="btnB" onclick="setMode('date')">날짜 중심</button>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="proto-hero">
+      <div class="h-title">SONO Shuttle Bus</div>
+      <div class="h-sub">스키시즌 2026.3.16~3.31 / 여름시즌 2026.7.11~8.18</div>
+      <div class="h-mode"><span class="dot"></span><span id="modeText">Mode A — 노선 중심</span></div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="sb-wrap">
+      <!-- 2. Tabs -->
+      <div class="sb-tabs">
+        <span class="wf-anno" style="position:relative;top:-2px;margin-right:4px;">2</span>
+        <button id="tOW" class="active" onclick="setTrip('oneway')">편도</button>
+        <button id="tRT" onclick="setTrip('roundtrip')">왕복</button>
+      </div>
+      <div class="sb-bar" id="searchBar" style="position:relative;"></div>
+    </div>
+
+    <!-- Dropdown backdrop -->
+    <div class="dd-backdrop" id="ddBg" onclick="closeDD()"></div>
+
+    <div class="proto-bottom">프로토타입 — 필드를 클릭하여 드롭다운 인터랙션 확인</div>
+  </div>
+</main>
+
+<!-- Result -->
+<div class="res-ov" id="resOv" onclick="closeRes(event)">
+  <div class="res-card" onclick="event.stopPropagation()">
+    <h3>검색 파라미터</h3>
+    <div id="resP"></div>
+    <div class="res-url" id="resU"></div>
+    <button class="res-close" onclick="closeResF()">닫기</button>
+  </div>
+</div>
+
+<script>
+// ── sono.rideus.net 실제 데이터 기반 ──
+const LOC={
+  1716:'가산디지털단지역',584:'강남역',1741:'강변역',1708:'건대입구역',651:'교대역',
+  1769:'구파발역',1738:'노원역',594:'동대문역사문화공원역',1718:'목동역',1047:'발산역',
+  1768:'불광역',598:'사당역',1728:'성신여대역',1709:'여의도역',1717:'영등포 신세계',
+  612:'종합운동장역',1722:'천호역',1739:'태릉입구역',587:'홍대입구역',1729:'회기역',
+  1719:'부평역',1740:'인천시청역',
+  1730:'구리역',1734:'대화역',1736:'마두역',1725:'범계역',1721:'부천시청역',
+  1724:'산본역',1723:'상록수역',1770:'삼송역',1726:'서현역',1720:'송내역',
+  601:'야탑역',1733:'운정',1737:'의정부역',1731:'영통역',1732:'죽전역',
+  1735:'화정역',1727:'하남',
+  250:'비발디파크(오션월드)'
+};
+// 카테고리별 출발지
+const CAT={'서울':[1716,584,1741,1708,651,1769,1738,594,1718,1047,1768,598,1728,1709,1717,612,1722,1739,587,1729],'인천':[1719,1740],'경기':[1730,1734,1736,1725,1721,1724,1723,1770,1726,1720,601,1733,1737,1731,1732,1735,1727]};
+// 출발지 → 도착지 매핑 (양방향)
+const RT={};
+Object.keys(LOC).forEach(id=>{if(id!=='250')RT[id]=[250];});
+// 비발디파크에서 출발 → 각 역 도착 (귀환)
+const ALL_STATIONS=Object.keys(LOC).filter(id=>id!=='250').map(Number);
+RT['250']=ALL_STATIONS;
+// 주요지점
+const POI={250:'비발디파크(오션월드)'};
+function gd(y,m,ds){return ds.map(d=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);}
+// 스케줄
+const SKI=gd(2026,3,[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]);
+const SUM_WD=gd(2026,7,[13,14,15,16,17,20,21,22,23,24,27,28,29,30,31]).concat(gd(2026,8,[3,4,5,6,7,10,11,12,13,14,17]));
+const SUM_ALL=gd(2026,7,[11,12,18,19,25,26]).concat(SUM_WD).concat(gd(2026,8,[1,2,8,9,15,16,18])).sort();
+const SC={};
+// 스키+여름: 서울 주요 4개 노선
+[587,594,1708,1741].forEach(id=>{SC[id]={250:SKI.concat(SUM_WD)};});
+// 여름 평일: 서울 나머지
+[584,651,598,612,1047,1718,1717,1709,1716,1722,1738,1739,1728,1729,1768,1769,1770].forEach(id=>{SC[id]={250:SUM_WD};});
+// 여름 전체(피크): 인천/경기
+[1719,1740,1730,1734,1736,1725,1721,1724,1723,1726,1720,601,1733,1737,1731,1732,1735,1727].forEach(id=>{SC[id]={250:SUM_ALL};});
+// 비발디파크 출발 스케줄 (역방향: 비발디→각역)
+SC['250']={};
+Object.keys(LOC).forEach(id=>{
+  if(id!=='250'&&SC[id]) SC['250'][id]=SC[id]['250'];
+});
+// 귀환
+const SCR={};
+Object.keys(SC).forEach(from=>{
+  Object.keys(SC[from]).forEach(to=>{
+    if(!SCR[to])SCR[to]={};
+    SCR[to][from]=SC[from][to];
+  });
+});
+function allD(){const s=new Set();for(const f in SC)for(const t in SC[f])SC[f][t].forEach(d=>s.add(d));return[...s].sort();}
+
+let S={mode:'route',trip:'oneway',dep:null,ret:null,from:null,to:null,pax:1,cy:2026,cm:2,rcy:2026,rcm:2,dd:null};
+
+const IC={
+  from:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>`,
+  to:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  cal:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  pax:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  go:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+};
+
+function fl(d){if(!d)return null;const dt=new Date(d+'T00:00:00');const w=['일','월','화','수','목','금','토'];return`${+d.split('-')[1]}/${+d.split('-')[2]}(${w[dt.getDay()]})`;}
+
+function setMode(m){S.mode=m;S.dep=S.ret=S.from=S.to=null;S.dd=null;
+  document.getElementById('btnA').classList.toggle('active',m==='route');
+  document.getElementById('btnB').classList.toggle('active',m==='date');
+  document.getElementById('modeText').textContent=m==='route'?'Mode A — 노선 중심':'Mode B — 날짜 중심';
+  render();}
+function setTrip(t){S.trip=t;S.ret=null;S.dd=null;
+  document.getElementById('tOW').classList.toggle('active',t==='oneway');
+  document.getElementById('tRT').classList.toggle('active',t==='roundtrip');
+  render();}
+
+function render(){
+  const bar=document.getElementById('searchBar');
+  const fs=[];
+  if(S.mode==='route'){
+    fs.push({id:'from',icon:IC.from,label:'출발지',val:S.from?LOC[S.from]:null,ph:'선택'});
+    fs.push({id:'to',icon:IC.to,label:'도착지',val:S.to?LOC[S.to]:null,ph:'선택'});
+    if(S.trip==='roundtrip'){
+      fs.push({id:'dep',icon:IC.cal,label:'출발',val:fl(S.dep),ph:'날짜 선택',pair:'ret'});
+      fs.push({id:'ret',icon:IC.cal,label:'귀환',val:fl(S.ret),ph:'날짜 선택',pOf:'dep'});
+    } else fs.push({id:'dep',icon:IC.cal,label:'출발 날짜',val:fl(S.dep),ph:'날짜 선택'});
+  } else {
+    if(S.trip==='roundtrip'){
+      fs.push({id:'dep',icon:IC.cal,label:'출발',val:fl(S.dep),ph:'날짜 선택',pair:'ret'});
+      fs.push({id:'ret',icon:IC.cal,label:'귀환',val:fl(S.ret),ph:'날짜 선택',pOf:'dep'});
+    } else fs.push({id:'dep',icon:IC.cal,label:'출발 날짜',val:fl(S.dep),ph:'날짜 선택'});
+    if(S.dep&&S.from){const ts=gTos(S.from,S.dep);if(ts.length===1&&!S.to)S.to=String(ts[0]);}
+    fs.push({id:'from',icon:IC.from,label:'출발지',val:S.from?LOC[S.from]:null,ph:'선택'});
+    const at=S.dep&&S.from&&gTos(S.from,S.dep).length===1;
+    fs.push({id:'to',icon:IC.to,label:'도착지',val:S.to?LOC[S.to]:null,ph:'선택',badge:at?'자동':null});
+  }
+  fs.push({id:'pax',icon:IC.pax,label:'인원',val:S.pax+'명',ph:null});
+
+  let h='<span class="wf-anno" style="position:absolute;top:-10px;left:-6px;z-index:300;">3</span>';
+  for(let i=0;i<fs.length;i++){
+    const f=fs[i];if(f.pOf)continue;
+    if(i>0&&!f.pair)h+=`<span class="sb-divider"></span>`;
+    if(f.pair){
+      const p=fs[i+1];
+      h+=`<div class="sb-date-pair">${cH(f)}${p?cH(p):''}</div>`;
+      if(i+1<fs.length-1)h+=`<span class="sb-divider"></span>`;
+      i++;
+    } else h+=cH(f);
+  }
+  const ok=S.dep&&S.from&&S.to&&(S.trip==='oneway'||S.ret);
+  h+=`<div class="sb-action"><button class="btn-go ${ok?'ready':''}" onclick="${ok?'doSearch()':''}">${IC.go}</button></div>`;
+  bar.innerHTML=h;
+  if(S.dd)openDDc(S.dd);
+}
+
+// annotation: one per group (first field only)
+const ANNO={dep:'4',from:'5',pax:'6'};
+
+function cH(f){
+  const c=f.val?'':'ph',d=f.val||f.ph||'',b=f.badge?`<span class="badge">${f.badge}</span>`:'';
+  const ac=S.dd===f.id?'active':'';
+  const al=(f.id==='pax'||f.id==='ret')?'right':'';
+  const wide=(f.id==='from'||f.id==='to')?'wide':'';
+  const an=ANNO[f.id]?`<span class="wf-anno" style="position:absolute;top:-10px;left:-6px;">${ANNO[f.id]}</span>`:'';
+  return`<div class="sb-cell" id="c_${f.id}" style="position:relative;">${an}<div class="sb-field ${ac}" onclick="onF('${f.id}')"><div class="ico">${f.icon}</div><div class="fc"><div class="fl">${f.label}</div><div class="fv ${c}">${d}</div></div>${b}</div><div class="dd ${al} ${wide}" id="dd_${f.id}"></div></div>`;
+}
+
+function onF(id){if(S.dd===id){closeDD();return;}S.dd=id;render();}
+function closeDD(){S.dd=null;document.querySelectorAll('.dd').forEach(p=>p.classList.remove('open'));document.querySelectorAll('.sb-field').forEach(s=>s.classList.remove('active'));document.getElementById('ddBg').classList.remove('open');}
+function openDDc(id){closeDD();S.dd=id;const p=document.getElementById('dd_'+id),sf=p?.previousElementSibling;if(!p)return;p.innerHTML=gPC(id);p.classList.add('open');if(sf)sf.classList.add('active');document.getElementById('ddBg').classList.add('open');}
+
+function gPC(id){
+  if(id==='from')return locC('from');
+  if(id==='to')return locC('to');
+  if(id==='dep')return calC(gDepD(),S.dep,'pDep','cy','cm','nDep');
+  if(id==='ret')return S.dep?calC(gRetD(),S.ret,'pRet','rcy','rcm','nRet'):'<p style="color:#94a3b8;text-align:center;padding:20px">출발 날짜를 먼저 선택하세요</p>';
+  if(id==='pax')return`<div class="px-c"><button class="px-b" onclick="aP(-1)" id="pM" ${S.pax<=1?'disabled':''}>−</button><span class="px-v" id="pV">${S.pax}</span><button class="px-b" onclick="aP(1)" ${S.pax>=10?'disabled':''}>+</button></div><button class="px-ok" onclick="cP()">확인</button>`;
+  return'';
+}
+
+// active category tab
+let fromCat='서울', toCat='서울';
+
+function locC(type){
+  const pickFn=type==='from'?'pkF':'pkT';
+  const sel=type==='from'?S.from:S.to;
+  const cat=type==='from'?fromCat:toCat;
+  const setCat=type==='from'?'fromCat':'toCat';
+
+  // available filter (date mode)
+  let avail=null;
+  if(type==='from'&&S.mode==='date'&&S.dep) avail=new Set(gFroms(S.dep).map(String));
+  if(type==='to'&&S.from){
+    const its=S.mode==='route'?(RT[S.from]||[]):(S.dep?gTos(S.from,S.dep):[]);
+    if(!its.length)return`<p style="color:#94a3b8;text-align:center;padding:20px">출발지를 먼저 선택하세요</p>`;
+    // 도착지가 주요지점(250)만이면 바로 표시
+    if(its.length===1&&its[0]===250){
+      return`<div class="loc-chips"><div class="loc-chip sel">${LOC[250]}</div></div>`;
+    }
+    // 도착지가 여러개 (비발디파크→각 역) → 카테고리 탭+칩
+    avail=new Set(its.map(String));
+  }
+
+  // 출발지가 250(비발디파크)인 경우 도착지는 각 역 → 카테고리 표시
+  const showStations=(type==='from')||(type==='to'&&S.from==='250');
+
+  if(!showStations){
+    // 도착지: 단순 칩 목록
+    const its=S.mode==='route'?(RT[S.from]||[]):(S.dep?gTos(S.from,S.dep):[]);
+    let h='<div class="loc-chips">';
+    its.forEach(id=>{h+=`<div class="loc-chip ${sel===String(id)?'sel':''}" onclick="${pickFn}('${id}')">${LOC[id]}</div>`;});
+    h+='</div>';
+    return h;
+  }
+
+  // 카테고리 탭
+  let h='<div class="loc-tabs">';
+  for(const c in CAT){
+    h+=`<button class="loc-tab ${cat===c?'on':'off'}" onclick="${setCat}='${c}';openDDc('${type}')">${c}</button>`;
+  }
+  h+='</div>';
+
+  // 칩 목록
+  const ids=CAT[cat]||[];
+  h+='<div class="loc-chips">';
+  ids.forEach(id=>{
+    const dis=avail&&!avail.has(String(id));
+    const s=sel===String(id)?'sel':'';
+    h+=`<div class="loc-chip ${s} ${dis?'dis':''}" ${dis?'':`onclick="${pickFn}('${id}')"`}>${LOC[id]}</div>`;
+  });
+  h+='</div>';
+
+  // 주요지점: 편도 출발지에서만 표시 (왕복 시 비발디파크는 출발지 불가)
+  if(type==='from'&&S.trip==='roundtrip'){
+    // 왕복: 주요지점 숨김
+  } else {
+    h+=`<div class="loc-sep">`;
+    h+=`<div class="loc-sep-label">📍 주요 지점</div>`;
+    h+=`<div class="loc-chips">`;
+    for(const pid in POI){
+      const dis=avail&&!avail.has(String(pid));
+      const s=sel===String(pid)?'sel':'';
+      h+=`<div class="loc-chip ${s} ${dis?'dis':''}" ${dis?'':`onclick="${pickFn}('${pid}')"`}>${POI[pid]}</div>`;
+    }
+    h+=`</div></div>`;
+  }
+
+  return h;
+}
+
+function calC(ad,sel,pk,yK,mK,nv){
+  const y=S[yK],m=S[mK],td=new Date(),dim=new Date(y,m+1,0).getDate(),fd=new Date(y,m,1).getDay();
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const aS=new Set(ad);
+  let h=`<div class="cal-header"><button onclick="${nv}(-1)">‹</button><span class="ml">${y}년 ${mn[m]}</span><button onclick="${nv}(1)">›</button></div>`;
+  h+=`<div class="cal-wk"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div class="cal-ds">`;
+  for(let i=0;i<fd;i++)h+='<div class="cal-d empty"></div>';
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const a=aS.has(ds),sl=ds===sel,tt=td.getFullYear()===y&&td.getMonth()===m&&td.getDate()===d,ps=new Date(ds)<new Date(td.toDateString());
+    let c='cal-d';if(sl)c+=' sel';else if(!a||ps)c+=' off';if(a&&!sl&&!ps)c+=' avail';if(tt)c+=' today';
+    h+=`<div class="${c}" ${a&&!ps?`onclick="${pk}('${ds}')"`:''}>${d}</div>`;
+  }
+  h+='</div>';
+  if(S.mode==='date')h+='<div class="cal-hint">운행 스케줄이 있는 날짜만 선택 가능</div>';
+  return h;
+}
+
+function gFroms(d){const r=[];for(const f in SC)for(const t in SC[f])if(SC[f][t].includes(d)){if(!r.includes(f))r.push(f);break;}return r;}
+function gTos(f,d){return(RT[f]||[]).filter(t=>(SC[f]?.[t]||[]).includes(d));}
+function gDepD(){if(S.mode==='route'&&S.from&&S.to)return SC[S.from]?.[S.to]||[];if(S.mode==='date')return allD();return[];}
+function gRetD(){if(S.from&&S.to)return(SCR[S.to]?.[S.from]||[]).filter(d=>d>=(S.dep||''));const s=new Set();for(const t in SCR)for(const f in SCR[t])SCR[t][f].filter(d=>d>=(S.dep||'')).forEach(d=>s.add(d));return[...s].sort();}
+
+function pkF(id){S.from=id;S.to=null;if(S.mode==='route'){S.dep=null;S.ret=null;const ts=RT[id]||[];if(ts.length===1)S.to=String(ts[0]);}else{S.ret=null;/* date mode: auto-select to if only 1 — handled in render */}S.dd=null;closeDD();render();}
+function pkT(id){S.to=String(id);if(S.mode==='route'){S.dep=null;S.ret=null;}S.dd=null;closeDD();render();}
+function pDep(d){S.dep=d;if(S.mode==='date')S.to=null;if(S.ret&&S.ret<d)S.ret=null;S.dd=null;closeDD();render();}
+function pRet(d){S.ret=d;S.dd=null;closeDD();render();}
+function nDep(dir){S.cm+=dir;if(S.cm>11){S.cm=0;S.cy++;}if(S.cm<0){S.cm=11;S.cy--;}openDDc('dep');}
+function nRet(dir){S.rcm+=dir;if(S.rcm>11){S.rcm=0;S.rcy++;}if(S.rcm<0){S.rcm=11;S.rcy--;}openDDc('ret');}
+function aP(d){S.pax=Math.max(1,Math.min(10,S.pax+d));const v=document.getElementById('pV');if(v)v.textContent=S.pax;const m=document.getElementById('pM');if(m)m.disabled=S.pax<=1;}
+function cP(){S.dd=null;closeDD();render();}
+
+function doSearch(){
+  if(!S.dep||!S.from||!S.to)return;if(S.trip==='roundtrip'&&!S.ret)return;
+  const p={type:S.trip,departure_date:S.dep,from_id:S.from,to_id:S.to,passengers:S.pax};
+  if(S.trip==='roundtrip')p.return_date=S.ret;
+  const rows=[['여행 유형',S.trip==='oneway'?'편도':'왕복'],['출발 날짜',fl(S.dep)],...(S.trip==='roundtrip'?[['귀환 날짜',fl(S.ret)]]:[]),['출발지',`${LOC[S.from]} (ID:${S.from})`],['도착지',`${LOC[S.to]} (ID:${S.to})`],['인원',S.pax+'명']];
+  document.getElementById('resP').innerHTML=rows.map(([l,v])=>`<div class="pr"><span class="pl">${l}</span><span class="pv">${v}</span></div>`).join('');
+  document.getElementById('resU').textContent=`/search-results?${new URLSearchParams(p)}`;
+  document.getElementById('resOv').classList.add('open');
+}
+function closeRes(e){if(e.target===document.getElementById('resOv'))closeResF();}
+function closeResF(){document.getElementById('resOv').classList.remove('open');}
+
+render();
+</script>
+</body>
+</html>
