@@ -54,16 +54,22 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
 /* ══════════════════════
    우측: 프로토타입 캔버스
    ══════════════════════ */
-.canvas-panel{flex:1;padding:40px;overflow:auto;background-image:radial-gradient(#d1d5db 1px,transparent 0);background-size:20px 20px;display:flex;align-items:flex-start;justify-content:center;}
+.canvas-panel{flex:1;padding:40px;overflow:auto;background-image:radial-gradient(#d1d5db 1px,transparent 0);background-size:20px 20px;display:flex;flex-direction:column;align-items:center;gap:32px;}
 
 .proto-frame{width:900px;background:#fff;border:2px solid var(--wf-border);border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);overflow:visible;position:relative;}
 
-/* ── Admin toggle bar ── */
-.admin-toggle{background:#1e293b;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;border-radius:6px 6px 0 0;}
-.admin-toggle .label{opacity:.5;}
-.admin-toggle .switch{display:flex;background:#334155;border-radius:6px;overflow:hidden;}
-.admin-toggle .switch button{padding:5px 14px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s;}
-.admin-toggle .switch button.active{background:var(--search-primary);color:#fff;}
+/* ── Frame label ── */
+.frame-label{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-left:4px;}
+.frame-label .fl-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.frame-label .fl-icon.frontend{background:#dbeafe;color:#2563eb;}
+.frame-label .fl-icon.admin{background:#fae8ff;color:#a855f7;}
+.frame-label .fl-title{font-size:13px;font-weight:700;color:#475569;}
+.frame-label .fl-desc{font-size:11px;color:#94a3b8;}
+
+/* ── Admin frame ── */
+.admin-frame{width:900px;background:#fff;border:2px solid #c084fc;border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);overflow:visible;}
+
+/* (admin-toggle removed — mode switching moved to admin frame) */
 
 /* ── Hero ── */
 .proto-hero{background:linear-gradient(180deg,#0063AF 2%,#65A1FF 100%);padding:50px 20px 70px;text-align:center;position:relative;}
@@ -168,10 +174,9 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
 .proto-bottom{height:60px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;}
 
 /* ── Admin Settings Panel ── */
-.admin-panel{margin:40px 32px 24px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.admin-panel-header{padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;}
+.admin-panel-header{padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;border-radius:6px 6px 0 0;background:#faf5ff;}
 .admin-panel-header h3{font-size:14px;font-weight:700;color:#1e293b;}
-.admin-panel-header .ver{font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:4px;}
+.admin-panel-header .ver{font-size:11px;color:#a855f7;background:#f3e8ff;padding:2px 8px;border-radius:4px;font-weight:600;}
 .admin-form{padding:16px 20px;}
 .admin-row{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f8fafc;}
 .admin-row:last-child{border-bottom:none;}
@@ -270,18 +275,14 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
 
 <!-- ══════════════ 우측: 프로토타입 ══════════════ -->
 <main class="canvas-panel">
-  <div class="proto-frame">
 
-    <!-- 1. Admin toggle -->
-    <div class="admin-toggle">
-      <span class="wf-anno">1</span>
-      <span class="label">관리자 설정:</span>
-      <span class="label">서치폼 모드</span>
-      <div class="switch">
-        <button id="btnA" class="active" onclick="setMode('route')">노선 중심</button>
-        <button id="btnB" onclick="setMode('date')">날짜 중심</button>
-      </div>
+  <!-- ══ Frame 1: 프론트엔드 서치폼 ══ -->
+  <div>
+    <div class="frame-label">
+      <div class="fl-icon frontend">F</div>
+      <div><div class="fl-title">프론트엔드 — 사용자 화면</div><div class="fl-desc">화이트라벨 서비스 페이지에 노출되는 서치폼</div></div>
     </div>
+    <div class="proto-frame">
 
     <!-- Hero -->
     <div class="proto-hero">
@@ -304,8 +305,17 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
     <!-- Dropdown backdrop -->
     <div class="dd-backdrop" id="ddBg" onclick="closeDD()"></div>
 
-    <!-- Admin Settings Panel -->
-    <div class="admin-panel">
+    <div class="proto-bottom">프론트엔드 서치폼 — 필드를 클릭하여 드롭다운 인터랙션 확인</div>
+    </div>
+  </div>
+
+  <!-- ══ Frame 2: 관리자 설정 ══ -->
+  <div>
+    <div class="frame-label">
+      <div class="fl-icon admin">A</div>
+      <div><div class="fl-title">관리자 — 서치폼 설정 화면</div><div class="fl-desc">화이트라벨 관리자 패널에서 서치폼을 설정하는 화면</div></div>
+    </div>
+    <div class="admin-frame">
       <div class="admin-panel-header">
         <h3>Shuttlebus: Form Search</h3>
         <span class="ver">ver 1.2</span>
@@ -408,8 +418,6 @@ body{font-family:'Noto Sans KR',sans-serif;background-color:var(--bg-color);colo
         </div>
       </div>
     </div>
-
-    <div class="proto-bottom">프로토타입 — 필드를 클릭하여 드롭다운 인터랙션 확인</div>
   </div>
 </main>
 
@@ -487,8 +495,6 @@ const IC={
 function fl(d){if(!d)return null;const dt=new Date(d+'T00:00:00');const w=['일','월','화','수','목','금','토'];return`${+d.split('-')[1]}/${+d.split('-')[2]}(${w[dt.getDay()]})`;}
 
 function setMode(m){S.mode=m;S.dep=S.ret=S.from=S.to=null;S.dd=null;
-  document.getElementById('btnA').classList.toggle('active',m==='route');
-  document.getElementById('btnB').classList.toggle('active',m==='date');
   document.getElementById('modeText').textContent=m==='route'?'Mode A — 노선 중심':'Mode B — 날짜 중심';
   // 관리자 패널 라디오 동기화
   const rA=document.querySelector('#admModeA input'),rB=document.querySelector('#admModeB input');
